@@ -1,0 +1,79 @@
+/// ตารางช่วย: ลำดับ ชื่อย่อ และกลุ่มของแต่ละมิติ (severity และ occupational_disease ไม่อยู่ในตารางนี้โดยตั้งใจ)
+table DimOrder
+	lineageTag: 0071c9b3-4606-4144-90d0-a7bb2ddeacc9
+
+	column dimension
+		dataType: string
+		lineageTag: a717a26b-ff6b-4a9f-b19e-68c185afdba0
+		summarizeBy: none
+		sourceColumn: dimension
+
+	column label
+		dataType: string
+		lineageTag: 46a9d8df-ece2-4dc4-9edc-85b8b2274c87
+		summarizeBy: none
+		sourceColumn: label
+		sortByColumn: persona_order
+
+	column persona_order
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: 5307ad0c-8b9e-47d4-bca7-1fd0f101838f
+		summarizeBy: none
+		sourceColumn: persona_order
+
+	column group
+		dataType: string
+		lineageTag: b8e24476-77c7-4385-9152-54537b6f7fe2
+		summarizeBy: none
+		sourceColumn: group
+		sortByColumn: group_order
+
+	column group_order
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: 1d3cc9c2-301d-4f3d-b435-1162ac1e8c22
+		summarizeBy: none
+		sourceColumn: group_order
+
+	/// ชื่อแถวในตารางโซน D (ต่อท้ายด้วยอันดับ 1 ของภาพรวม 5 ปี) แถว _hdr_* คือหัวกลุ่ม ไม่มีข้อมูล
+	column row_label
+		dataType: string
+		lineageTag: f0f5e53a-e8ed-4ff5-accb-039b25c52f46
+		summarizeBy: none
+		sourceColumn: row_label
+		sortByColumn: row_order
+
+	column row_order
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: 14a4c055-d51a-4944-9376-3c21b61b9fac
+		summarizeBy: none
+		sourceColumn: row_order
+
+	partition DimOrder = m
+		mode: import
+		source =
+				let
+					Source = #table(
+						type table [dimension = text, label = text, persona_order = Int64.Type, group = text, group_order = Int64.Type, row_label = text, row_order = Int64.Type],
+						{
+							{"_hdr_what", "หัวข้อ: เกิดอะไรขึ้น", 98, "เกิดอะไรขึ้น", 1, "เกิดอะไรขึ้น", 0},
+							{"agent", "สิ่งที่ทำให้บาดเจ็บ", 7, "เกิดอะไรขึ้น", 1, "   สิ่งที่ทำให้บาดเจ็บ · วัตถุ/สิ่งของ", 1},
+							{"injury_result", "ลักษณะบาดแผล", 9, "เกิดอะไรขึ้น", 1, "   ลักษณะบาดแผล · แผลลึก", 2},
+							{"body_part", "อวัยวะ", 8, "เกิดอะไรขึ้น", 1, "   อวัยวะ · นิ้วมือ", 3},
+							{"cause", "สาเหตุ", 6, "เกิดอะไรขึ้น", 1, "   สาเหตุ · ของมีคมบาด", 4},
+							{"_hdr_who", "หัวข้อ: ใคร / ที่ไหน", 99, "เป็นใคร / ทำงานที่ไหน", 2, "เป็นใคร / ทำงานที่ไหน", 5},
+							{"age_group", "อายุ", 1, "เป็นใคร / ทำงานที่ไหน", 2, "   อายุ · 25-29 ปี", 6},
+							{"province", "จังหวัด", 2, "เป็นใคร / ทำงานที่ไหน", 2, "   จังหวัด · กรุงเทพฯ", 7},
+							{"occupation", "อาชีพ", 3, "เป็นใคร / ทำงานที่ไหน", 2, "   อาชีพ · งานพื้นฐาน", 8},
+							{"company_size", "ขนาดที่ทำงาน", 4, "เป็นใคร / ทำงานที่ไหน", 2, "   ขนาดที่ทำงาน · >1,000 คน", 9},
+							{"industry", "ประเภทกิจการ", 5, "เป็นใคร / ทำงานที่ไหน", 2, "   ประเภทกิจการ · ก่อสร้างที่พัก", 10}
+						}
+					)
+				in
+					Source
+

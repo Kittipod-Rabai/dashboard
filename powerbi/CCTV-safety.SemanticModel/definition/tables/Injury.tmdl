@@ -1,0 +1,272 @@
+table Injury
+	lineageTag: f8eb5ec0-e812-4f6d-9ad9-b6276b23f733
+
+	/// ---------- กลุ่ม 1: ตัวเลขพื้นฐาน ----------
+	/// รวมจำนวนผู้บาดเจ็บของแถวที่ถูกกรอง
+	measure Injured = SUM ( Injury[injured_count] )
+		formatString: #,0
+		displayFolder: 1 ตัวเลขพื้นฐาน
+		lineageTag: 871227fe-8d3d-404c-8832-ea76047a9909
+
+	/// ยอดผู้บาดเจ็บทั้งหมดของปีที่เลือก (ห้ามใช้ SUM เพราะยอดนี้ซ้ำอยู่ทุกแถว)
+	measure 'Total Injured' = SUMX ( VALUES ( Injury[year_ce] ), CALCULATE ( MAX ( Injury[total_injured_year] ) ) )
+		formatString: #,0
+		displayFolder: 1 ตัวเลขพื้นฐาน
+		lineageTag: 887eeeb4-1dbd-448e-91de-3be1a5811649
+
+	measure Employees = SUMX ( VALUES ( Injury[year_ce] ), CALCULATE ( MAX ( Injury[insured_employees] ) ) )
+		formatString: #,0
+		displayFolder: 1 ตัวเลขพื้นฐาน
+		lineageTag: 4feb5d0b-7f8b-4cbf-8952-75f833a9bd07
+
+	measure 'Injured per Day' = DIVIDE ( [Total Injured], COUNTROWS ( VALUES ( Injury[year_ce] ) ) * 365 )
+		formatString: #,0
+		displayFolder: 1 ตัวเลขพื้นฐาน
+		lineageTag: 31be26b7-e281-46a0-8b3a-fe933c1f01b9
+
+	/// 1,440 คือจำนวนนาทีใน 1 วัน
+	measure 'Minutes per Injury' = DIVIDE ( 1440, [Injured per Day] )
+		formatString: 0.0
+		displayFolder: 1 ตัวเลขพื้นฐาน
+		lineageTag: 7895eb91-2e0c-4f19-b755-1b33ead3903c
+
+	measure 'Rate per 1000' = DIVIDE ( [Total Injured], [Employees] ) * 1000
+		formatString: 0.00
+		displayFolder: 1 ตัวเลขพื้นฐาน
+		lineageTag: 4740eba9-9769-4bf2-908c-9f1c4f55906c
+
+	/// สัดส่วนของรายการต่อผู้บาดเจ็บทั้งหมดในปีที่เลือก (หน้ารายละเอียด)
+	measure 'Share %' = DIVIDE ( [Injured], [Total Injured] )
+		formatString: 0.0%
+		displayFolder: 4 หน้ารายละเอียด
+
+	/// สัดส่วนแบบทศนิยม 2 ตำแหน่ง สำหรับความรุนแรงที่มีค่าเล็กมาก (ตาย, ทุพพลภาพ)
+	measure 'Share % 2dp' = [Share %]
+		formatString: 0.00%
+		displayFolder: 4 หน้ารายละเอียด
+
+	/// สีแท่ง: อันดับ 1 ของด้านนั้นเป็นสีฟ้า ที่เหลือสีเทา
+	measure 'Bar Color' =
+			VAR topItem = CALCULATE ( [Top Item], REMOVEFILTERS ( Injury[item_th], Injury[item_short] ) )
+			RETURN IF ( SELECTEDVALUE ( Injury[item_th] ) = topItem, "#2563EB", "#CBD5E1" )
+		displayFolder: 4 หน้ารายละเอียด
+
+	/// คำบรรยายใต้หัวกราฟ เช่น 5 อันดับแรกรวมกัน 76.2% ของผู้บาดเจ็บ
+	measure 'Top5 Share Text' = "5 อันดับแรกรวมกัน " & FORMAT ( [Share %], "0.0%" ) & " ของผู้บาดเจ็บ"
+		displayFolder: 4 หน้ารายละเอียด
+
+	/// ---------- กลุ่ม 2: อันดับ 1 ของแต่ละด้าน ----------
+	/// รายการที่มีผู้บาดเจ็บมากที่สุดในมิติที่ถูกกรอง (ถ้าเสมอกันแสดงทั้งคู่คั่นด้วย /)
+	measure 'Top Item' =
+			VAR t = TOPN ( 1, VALUES ( Injury[item_th] ), [Injured], DESC )
+			RETURN CONCATENATEX ( t, Injury[item_th], " / " )
+		displayFolder: 2 อันดับ 1
+		lineageTag: 13adf8c2-ca0a-4078-8553-fbee3c2da811
+
+	measure 'Top Share %' = DIVIDE ( MAXX ( VALUES ( Injury[item_th] ), [Injured] ), [Total Injured] )
+		formatString: 0.0%
+		displayFolder: 2 อันดับ 1
+		lineageTag: f9d476fd-cf73-4055-aef5-8e7064c6660c
+
+	/// อันดับ 1 ของภาพรวม 5 ปี ไม่สนใจปีที่ผู้ชมเลือก
+	measure 'Top Item 5yr' =
+			VAR t =
+				TOPN (
+					1,
+					CALCULATETABLE ( VALUES ( Injury[item_th] ), REMOVEFILTERS ( Injury[year_ce] ) ),
+					CALCULATE ( [Injured], REMOVEFILTERS ( Injury[year_ce] ) ),
+					DESC
+				)
+			RETURN CONCATENATEX ( t, Injury[item_th], " / " )
+		displayFolder: 2 อันดับ 1
+		lineageTag: 931a26f8-daea-4a59-9dbe-aad16abf777d
+
+	measure 'Trait Label' = [Top Item] & "  (" & FORMAT ( [Top Share %], "0.0%" ) & ")"
+		displayFolder: 2 อันดับ 1
+		lineageTag: 8fdb2d03-52fc-405a-851d-2b75f2e0364d
+
+	/// บรรทัดล่างของการ์ดอันดับ 1 เช่น 18.6% ของผู้บาดเจ็บ
+	measure 'Share Text' = FORMAT ( [Top Share %], "0.0%" ) & " ของผู้บาดเจ็บ"
+		displayFolder: 2 อันดับ 1
+		lineageTag: 1bd581a8-c71c-412d-88c6-762175d5772b
+
+	/// ---------- กลุ่ม 3: สีและป้ายที่เปลี่ยนตามข้อมูล ----------
+	measure 'Trait Color' = IF ( [Top Item] <> [Top Item 5yr], "#E8590C", "#1F2937" )
+		displayFolder: 3 สีและป้าย
+		lineageTag: 543eb14c-4750-4ea2-b14d-37612880389c
+
+	measure 'Trait Title' =
+			SELECTEDVALUE ( DimOrder[label] )
+				& IF ( [Top Item] <> [Top Item 5yr], "   ▲ ต่างจากภาพรวม 5 ปี", "" )
+		displayFolder: 3 สีและป้าย
+		lineageTag: 55e3e78f-2c03-4c50-9d52-a1e1622467c1
+
+	/// ✓ ถ้าอันดับ 1 ของปีนั้นตรงกับภาพรวม 5 ปี ไม่ตรงจะแสดงชื่อย่อของอันดับ 1 ปีนั้น
+	measure 'Cell Text' =
+			VAR cur = [Top Item]
+			RETURN
+				IF (
+					ISBLANK ( cur ), BLANK (),
+				IF (
+					cur = [Top Item 5yr],
+					"✓",
+					SWITCH (
+						cur,
+						"ผู้ปฏิบัติงานในโรงงาน/ควบคุมเครื่องจักร/ประกอบ", "เครื่องจักร",
+						"201-500 คน", "201-500",
+						"โรงแรม รีสอร์ท ห้องชุด", "โรงแรม",
+						cur
+					)
+				) )
+		displayFolder: 3 สีและป้าย
+		lineageTag: 0b2113eb-fcc3-4afb-9f28-42c11f40c08a
+
+	measure 'Cell Color' = IF ( ISBLANK ( [Top Item] ), "#FFFFFF", IF ( [Top Item] = [Top Item 5yr], "#EFF6FF", "#FFEDD5" ) )
+		displayFolder: 3 สีและป้าย
+		lineageTag: 9f430fde-3624-49fd-96d9-ff8db572faea
+
+	measure 'Cell Font Color' = IF ( ISBLANK ( [Top Item] ), "#94A3B8", IF ( [Top Item] = [Top Item 5yr], "#2563EB", "#9A3412" ) )
+		displayFolder: 3 สีและป้าย
+		lineageTag: 9760af7f-8a7e-4f44-8110-d1ea85273330
+
+	/// ประโยคเปิดเรื่องที่เปลี่ยนตามปีที่เลือก
+	measure Headline = "ทุก " & FORMAT ( [Minutes per Injury], "0.0" ) & " นาที มีลูกจ้างไทยบาดเจ็บจากงาน 1 คน"
+		displayFolder: 3 สีและป้าย
+		lineageTag: d7993b60-e4ff-4b52-b14f-3adbebfd8acf
+
+	column year_ce
+		dataType: int64
+		formatString: 0
+		lineageTag: 17775c48-d3ef-47b4-978e-bd614c888cf5
+		summarizeBy: none
+		sourceColumn: year_ce
+
+	column year_be
+		dataType: int64
+		formatString: 0
+		lineageTag: be1d9595-b6a4-4961-9487-769c37f970a4
+		summarizeBy: none
+		sourceColumn: year_be
+
+	column dimension
+		dataType: string
+		lineageTag: 7a101b8a-71f9-449f-afd6-e7f34a80057d
+		summarizeBy: none
+		sourceColumn: dimension
+
+	column dimension_th
+		dataType: string
+		lineageTag: bc6762a7-4f39-4799-a026-fbb05ecb0721
+		summarizeBy: none
+		sourceColumn: dimension_th
+
+	column dimension_en
+		dataType: string
+		lineageTag: d385738f-7755-4072-9e0e-36354a97ff04
+		summarizeBy: none
+		sourceColumn: dimension_en
+
+	column rank_in_year
+		dataType: int64
+		formatString: 0
+		lineageTag: 8e2a4cd5-ce62-4f6f-ae42-f1fa2ea0f1e2
+		summarizeBy: none
+		sourceColumn: rank_in_year
+
+	column item_th
+		dataType: string
+		lineageTag: 5526722a-203d-4f03-af52-85f37308dc5c
+		summarizeBy: none
+		sourceColumn: item_th
+
+	column item_en
+		dataType: string
+		lineageTag: 1358bbe1-6831-4009-975e-7ca941f3d540
+		summarizeBy: none
+		sourceColumn: item_en
+
+	column injured_count
+		dataType: int64
+		formatString: #,0
+		lineageTag: 7d8704f9-3802-4c8f-b357-374b6bc5134c
+		summarizeBy: sum
+		sourceColumn: injured_count
+
+	column total_injured_year
+		dataType: int64
+		formatString: #,0
+		lineageTag: 8624182a-07fd-4fbf-9435-1029e5fa696c
+		summarizeBy: none
+		sourceColumn: total_injured_year
+
+	column pct_of_year_total
+		dataType: double
+		formatString: 0.00
+		lineageTag: 612fe496-0633-4103-b2a0-60e6679a4776
+		summarizeBy: none
+		sourceColumn: pct_of_year_total
+
+	column insured_employees
+		dataType: int64
+		formatString: #,0
+		lineageTag: f00a84c9-cd4b-471d-8e0c-9c67da88292d
+		summarizeBy: none
+		sourceColumn: insured_employees
+
+	column rate_per_1000_employees
+		dataType: double
+		formatString: 0.0000
+		lineageTag: 8180c8c5-bc60-4270-9e7e-f20fa3176573
+		summarizeBy: none
+		sourceColumn: rate_per_1000_employees
+
+	/// คลาสของโมเดล CCTV ที่เกี่ยวข้อง (helmet, vest, fall, fire, smoke)
+	column related_ai_class
+		dataType: string
+		lineageTag: 6e1102ee-b18b-46cd-a6eb-e97e0b120c2b
+		summarizeBy: none
+		sourceColumn: related_ai_class
+
+	/// ชื่อสั้นสำหรับ legend กราฟเส้นโซน E
+	column item_short =
+			SWITCH (
+				Injury[item_th],
+				"อาชีพงานพื้นฐาน", "งานพื้นฐาน",
+				"ผู้ปฏิบัติงานในโรงงาน/ควบคุมเครื่องจักร/ประกอบ", "คุมเครื่องจักร/ประกอบ",
+				"ผู้ปฏิบัติงานโดยใช้ฝีมือ", "ใช้ฝีมือ",
+				"วัตถุหรือสิ่งของตัด/บาด/ทิ่มแทง", "ของมีคมตัด/บาด/ทิ่มแทง",
+				"วัตถุหรือสิ่งของพังทลาย/หล่นทับ", "ของพังทลาย/หล่นทับ",
+				"วัตถุหรือสิ่งของกระแทก/ชน", "ของกระแทก/ชน",
+				"วัตถุ สิ่งของ หรือสารเคมีกระเด็นเข้าตา", "ของ/สารเคมีกระเด็นเข้าตา",
+				"วัตถุหรือสิ่งของหนีบ/ดึง", "ของหนีบ/ดึง",
+				"ก่อสร้างอาคารที่พักอาศัย", "ก่อสร้างที่พักอาศัย",
+				"ก่อสร้างอาคารที่ไม่ใช่ที่พักอาศัย", "ก่อสร้างอาคารอื่น",
+				"โรคระบบกล้ามเนื้อและโครงสร้างกระดูก", "กล้ามเนื้อ/กระดูก",
+				"โรคจากสาเหตุทางชีวภาพ", "สาเหตุทางชีวภาพ",
+				"โรคผิวหนังจากสาเหตุทางกายภาพ เคมี หรือชีวภาพ", "ผิวหนัง (กายภาพ/เคมี/ชีวภาพ)",
+				"โรคผิวหนังอื่น", "ผิวหนังอื่น",
+				"โรคระบบหายใจอื่น", "ระบบหายใจอื่น",
+				Injury[item_th]
+			)
+		dataType: string
+		lineageTag: f31c5599-ddf1-4fc2-8b40-13939b46e5e3
+		summarizeBy: none
+
+	partition Injury = m
+		mode: import
+		source =
+				let
+					Files = Folder.Files(DataFolder),
+					CsvFiles = Table.SelectRows(Files, each Text.StartsWith([Name], "sso_injury_") and Text.Lower([Extension]) = ".csv"),
+					Parsed = Table.AddColumn(CsvFiles, "Data", each Table.PromoteHeaders(Csv.Document([Content], [Delimiter = ",", Encoding = 65001, QuoteStyle = QuoteStyle.Csv]), [PromoteAllScalars = true])),
+					Combined = Table.Combine(Parsed[Data]),
+					Typed = Table.TransformColumnTypes(Combined, {
+						{"year_ce", Int64.Type}, {"year_be", Int64.Type}, {"rank_in_year", Int64.Type},
+						{"injured_count", Int64.Type}, {"total_injured_year", Int64.Type}, {"insured_employees", Int64.Type},
+						{"pct_of_year_total", type number}, {"rate_per_1000_employees", type number},
+						{"dimension", type text}, {"dimension_th", type text}, {"dimension_en", type text},
+						{"item_th", type text}, {"item_en", type text}, {"related_ai_class", type text}
+					}, "en-US")
+				in
+					Typed
+

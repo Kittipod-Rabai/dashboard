@@ -1,0 +1,11 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/gitIntegration/platformProperties/2.0.0/schema.json",
+  "metadata": {
+    "type": "Report",
+    "displayName": "CCTV-safety"
+  },
+  "config": {
+    "version": "2.0",
+    "logicalId": "6157efd1-0d73-4650-85f5-1e9dfbcfe2e5"
+  }
+}

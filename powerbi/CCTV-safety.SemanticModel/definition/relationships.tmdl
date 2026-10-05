@@ -1,0 +1,4 @@
+relationship Injury_dimension_DimOrder
+	fromColumn: Injury.dimension
+	toColumn: DimOrder.dimension
+

@@ -1,0 +1,87 @@
+{
+  "name": "CCTV-safety",
+  "dataColors": [
+    "#2563EB",
+    "#1E3A8A",
+    "#94A3B8",
+    "#E8590C",
+    "#0EA5E9",
+    "#64748B",
+    "#F59E0B",
+    "#10B981"
+  ],
+  "foreground": "#1F2937",
+  "foregroundNeutralSecondary": "#6B7280",
+  "background": "#FFFFFF",
+  "tableAccent": "#2563EB",
+  "good": "#2563EB",
+  "bad": "#E8590C",
+  "neutral": "#94A3B8",
+  "textClasses": {
+    "callout": {
+      "fontFace": "Segoe UI",
+      "color": "#1F2937"
+    },
+    "title": {
+      "fontFace": "Segoe UI",
+      "color": "#1F2937",
+      "fontSize": 12
+    },
+    "header": {
+      "fontFace": "Segoe UI",
+      "color": "#1F2937"
+    },
+    "label": {
+      "fontFace": "Segoe UI",
+      "color": "#1F2937",
+      "fontSize": 10
+    }
+  },
+  "visualStyles": {
+    "*": {
+      "*": {
+        "background": [
+          {
+            "show": true,
+            "color": {
+              "solid": {
+                "color": "#FFFFFF"
+              }
+            },
+            "transparency": 0
+          }
+        ],
+        "border": [
+          {
+            "show": true,
+            "color": {
+              "solid": {
+                "color": "#E5E7EB"
+              }
+            },
+            "radius": 8
+          }
+        ],
+        "dropShadow": [
+          {
+            "show": false
+          }
+        ]
+      }
+    },
+    "page": {
+      "*": {
+        "background": [
+          {
+            "color": {
+              "solid": {
+                "color": "#F7F7F5"
+              }
+            },
+            "transparency": 0
+          }
+        ]
+      }
+    }
+  }
+}

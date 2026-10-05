@@ -1,0 +1,6 @@
+/// โฟลเดอร์ที่มีเฉพาะไฟล์ sso_injury_YYYY.csv
+expression DataFolder = "D:\prj\dash board\data\" meta [IsParameterQuery=true, Type="Text", IsParameterQueryRequired=true]
+	lineageTag: 5e0d4e03-f3f4-45fa-bd6e-aec6c997f445
+
+	annotation PBI_ResultType = Text
+

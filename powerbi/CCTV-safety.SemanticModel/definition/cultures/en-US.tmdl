@@ -1,0 +1,92 @@
+cultureInfo en-US
+
+	linguisticMetadata =
+			{
+			  "Version": "2.0.0",
+			  "Language": "en-US",
+			  "Entities": {
+			    "dimorder.row_label": {
+			      "Definition": {
+			        "Binding": {
+			          "ConceptualEntity": "DimOrder",
+			          "ConceptualProperty": "row_label"
+			        }
+			      },
+			      "State": "Generated"
+			    },
+			    "injury.cell_text": {
+			      "Definition": {
+			        "Binding": {
+			          "ConceptualEntity": "Injury",
+			          "ConceptualProperty": "Cell Text"
+			        }
+			      },
+			      "State": "Generated",
+			      "Terms": [
+			        {
+			          "อันดับ 1": {
+			            "State": "Suggested",
+			            "Source": {
+			              "Type": "External",
+			              "Agent": "PowerBI.VisualColumnRename"
+			            },
+			            "Weight": 0.9
+			          }
+			        }
+			      ]
+			    },
+			    "injury.injured": {
+			      "Definition": {
+			        "Binding": {
+			          "ConceptualEntity": "Injury",
+			          "ConceptualProperty": "Injured"
+			        }
+			      },
+			      "State": "Generated",
+			      "Terms": [
+			        {
+			          "ผู้บาดเจ็บ (ราย)": {
+			            "State": "Suggested",
+			            "Source": {
+			              "Type": "External",
+			              "Agent": "PowerBI.VisualColumnRename"
+			            },
+			            "Weight": 0.9
+			          }
+			        }
+			      ]
+			    },
+			    "injury.item_short": {
+			      "Definition": {
+			        "Binding": {
+			          "ConceptualEntity": "Injury",
+			          "ConceptualProperty": "item_short"
+			        }
+			      },
+			      "State": "Generated",
+			      "Terms": [
+			        {
+			          "อาชีพ": {
+			            "State": "Suggested",
+			            "Source": {
+			              "Type": "External",
+			              "Agent": "PowerBI.VisualColumnRename"
+			            },
+			            "Weight": 0.9
+			          }
+			        }
+			      ]
+			    },
+			    "injury.item_th": {
+			      "Definition": {
+			        "Binding": {
+			          "ConceptualEntity": "Injury",
+			          "ConceptualProperty": "item_th"
+			        }
+			      },
+			      "State": "Generated"
+			    }
+			  }
+			}
+		contentType: json
+
